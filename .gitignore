@@ -1,0 +1,54 @@
+# Игнорировать виртуальное окружение
+venv/
+env/
+.venv/
+
+# Игнорировать кэш Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Игнорировать файлы настроек PyCharm
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Игнорировать файлы настроек VSCode (если используется)
+.vscode/
+
+# Игнорировать логи и результаты тестов
+logs/
+*.log
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Игнорировать файлы сборки и дистрибуции
+build/
+dist/
+*.egg-info/
+*.egg
+*.whl
+
+# Игнорировать файлы конфигурации и среды
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Игнорировать файлы операционной системы
+.DS_Store
+Thumbs.db
+
+# Игнорировать Jupyter Notebook
+.ipynb_checkpoints/
+
+# Игнорировать файлы миграций (если используется Django или другой фреймворк с миграциями)
+migrations/
+
+# Игнорировать файлы кэша и временные файлы
+*.swp
+*.swo
+*~
