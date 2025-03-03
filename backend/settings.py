@@ -1,8 +1,13 @@
 from pathlib import Path
+from dotenv import load_dotenv
+import os
+
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-jx=@%mrfajf!+mrt%4lswn=e*m_hg56y@tvk27c-gdwtn=ecm8'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = True
 
@@ -21,6 +26,17 @@ INSTALLED_APPS = [
     'hourgraph',
     'corsheaders',
 ]
+
+AUTH_USER_MODEL = 'hourgraph.Users'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -64,8 +80,12 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',  # Используемый движок базы данных
+        'NAME': os.getenv('DB_NAME'),                    # Имя базы данных
+        'USER': os.getenv('DB_USER'),                    # Имя пользователя базы данных
+        'PASSWORD': os.getenv('DB_PASSWORD'),            # Пароль пользователя базы данных
+        'HOST': 'localhost',                       # Хост базы данных (обычно 'localhost' или '127.0.0.1')
+        'PORT': '5432',                            # Порт базы данных (по умолчанию 5432 для PostgreSQL)
     }
 }
 
