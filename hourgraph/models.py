@@ -2,9 +2,18 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from hourgraph.managers import CustomUserManager
+
 
 class Users(AbstractUser):  # Таблица "Users"
+    username = None  # Убираем поле username
+    email = models.EmailField(unique=True)  # Делаем email уникальным
     name = models.CharField(max_length=256)
+
+    USERNAME_FIELD = 'email'  # Указываем, что email используется для аутентификации
+    REQUIRED_FIELDS = []  # Убираем username из обязательных полей
+
+    objects = CustomUserManager()  # Используем кастомный менеджер
 
     def __str__(self):
         return self.name

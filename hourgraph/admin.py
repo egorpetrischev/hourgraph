@@ -2,8 +2,8 @@ from django.contrib import admin
 from .models import Users, StudentCard, StudentCardGroup, Lesson, LessonTemplate
 
 
-admin.register(Users)
-admin.register(StudentCard)
-admin.register(StudentCardGroup)
-admin.register(Lesson)
-admin.register(LessonTemplate)
+admin.site.register(Users)
+admin.site.register(StudentCard)
+admin.site.register(StudentCardGroup)
+admin.site.register(Lesson)
+admin.site.register(LessonTemplate)

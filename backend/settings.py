@@ -22,21 +22,56 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
-    'hourgraph',
-    'corsheaders',
+    'rest_framework', # drf
+    # 'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
+    'hourgraph', # app
+    'corsheaders', #cors
+    'django.contrib.sites', #allauth
+    'allauth',
+    'allauth.account',
 ]
 
 AUTH_USER_MODEL = 'hourgraph.Users'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
 }
+
+# """ JWT """
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+}
+# """"""
+
+AUTHENTICATION_BACKENDS = [
+    # Необходимо для входа в систему через username в Django admin
+    'django.contrib.auth.backends.ModelBackend',
+
+    # Специальный метод аутентификации allauth, например, через email
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+# Настройки allauth
+ACCOUNT_EMAIL_REQUIRED = True  # Обязательное поле email
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  # Подтверждение email обязательно
+ACCOUNT_UNIQUE_EMAIL = True  # Уникальный email
+ACCOUNT_USERNAME_REQUIRED = False  # Не использовать username
+ACCOUNT_LOGIN_METHODS = {'email'} # Использовать email для входа
+
+# Настройки для отправки писем (например, через консоль для разработки)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+SITE_ID = 1
+#_________
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -48,6 +83,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 CORS_ALLOWED_ORIGINS = [
