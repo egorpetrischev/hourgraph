@@ -1,4 +1,3 @@
-from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -26,7 +25,6 @@ class StudentCard(models.Model):    # Таблица "Student_card"
     contacts = models.TextField(null=True, blank=True)
     comment = models.TextField(null=True, blank=True)
     address = models.CharField(max_length=256, null=True, blank=True)
-    lesson_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     def __str__(self):
         return f'{self.name}' if not self.surname else f'{self.name} {self.surname}'
@@ -37,7 +35,6 @@ class StudentCardGroup(models.Model):   # Таблица "Student_card_group"
     students = models.ManyToManyField(StudentCard)
     name = models.CharField(max_length=256)
     comment = models.TextField(null=True, blank=True)
-    lesson_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     def __str__(self):
         return self.name
@@ -45,7 +42,7 @@ class StudentCardGroup(models.Model):   # Таблица "Student_card_group"
 
 class LessonTemplate(models.Model): # Таблица "Lesson_template"
     user = models.ForeignKey(Users, on_delete=models.CASCADE)
-    students = models.ManyToManyField(StudentCard)
+    student = models.ForeignKey(StudentCard, on_delete=models.SET_NULL, null=True)
     student_group = models.ForeignKey(StudentCardGroup, on_delete=models.SET_NULL, null=True)
     start_time = models.TimeField()
     end_time = models.TimeField()
@@ -59,7 +56,6 @@ class LessonTemplate(models.Model): # Таблица "Lesson_template"
         ('SU', 'Sunday')
     ))
     comment = models.TextField(null=True, blank=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     def __str__(self):
         return f'{self.weekday} {self.start_time}-{self.end_time}'
@@ -67,7 +63,7 @@ class LessonTemplate(models.Model): # Таблица "Lesson_template"
 
 class Lesson(models.Model): # Таблица "Lesson"
     user = models.ForeignKey(Users, on_delete=models.CASCADE)
-    students = models.ManyToManyField(StudentCard)
+    student = models.ForeignKey(StudentCard, on_delete=models.SET_NULL, null=True)
     student_group = models.ForeignKey(StudentCardGroup, on_delete=models.SET_NULL, null=True)
     start_time = models.TimeField()
     end_time = models.TimeField()
@@ -78,7 +74,6 @@ class Lesson(models.Model): # Таблица "Lesson"
         ('CO', 'Completed')
     ))
     comment = models.TextField(null=True, blank=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     def __str__(self):
         return f'{self.date} {self.start_time}-{self.end_time}'

@@ -4,7 +4,8 @@ from django.utils import timezone
 from allauth.account.models import EmailConfirmation
 from django.shortcuts import get_object_or_404
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from rest_framework import generics, status
+from rest_framework import generics, status, viewsets
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -12,10 +13,9 @@ from django.conf import settings
 from django.urls import reverse
 from django.core.mail import send_mail
 from django.utils.encoding import force_bytes, force_str
-
-from .models import Users
+from .models import Users, StudentCard, StudentCardGroup
 from .serializers import UserRegistrationSerializer, CustomTokenObtainPairSerializer, PasswordResetRequestSerializer, \
-    PasswordResetConfirmSerializer, PasswordChangeSerializer
+    PasswordResetConfirmSerializer, PasswordChangeSerializer, StudentCardSerializer, StudentCardGroupSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -108,3 +108,60 @@ class PasswordChangeView(APIView):
             user.save()
             return Response({'message': 'Пароль успешно изменен.'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class StudentCardViewSet(viewsets.ModelViewSet):
+    serializer_class = StudentCardSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return StudentCard.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        if instance.user != self.request.user:
+            raise PermissionDenied('Вы не можете удалить эту запись.')
+
+        return super().destroy(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        if instance.user != self.request.user:
+            raise PermissionDenied('Вы не можете изменять эту запись.')
+
+        return super().update(request, *args, **kwargs)
+
+
+class StudentCardGroupViewSet(viewsets.ModelViewSet):
+    serializer_class = StudentCardGroupSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return StudentCardGroup.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        return serializer.save(user=self.request.user)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        if instance.user != self.request.user:
+            raise PermissionDenied('Вы не можете изменять эту запись.')
+
+        if 'students' in request.data:
+            instance.students.set(request.data['students'])
+
+        return super().update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        if instance.user != self.request.user:
+            raise PermissionDenied('Вы не можете удалить эту запись.')
+
+        return super().destroy(request, *args, **kwargs)

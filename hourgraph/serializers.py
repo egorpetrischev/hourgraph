@@ -5,7 +5,7 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.urls import reverse
 from allauth.account.models import EmailAddress, EmailConfirmation
-from hourgraph.models import Users
+from hourgraph.models import Users, StudentCard, StudentCardGroup
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -89,3 +89,17 @@ class PasswordChangeSerializer(serializers.Serializer):
         if len(value) < 8:
             raise serializers.ValidationError('Пароль должен содержать минимум 8 символов.')
         return value
+
+
+class StudentCardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentCard
+        fields = ['id', 'name', 'surname', 'contacts', 'comment', 'address']
+
+
+class StudentCardGroupSerializer(serializers.ModelSerializer):
+    students = StudentCardSerializer(many=True, read_only=True)
+    class Meta:
+        model = StudentCardGroup
+        fields = ['id', 'students', 'name', 'comment']
+
