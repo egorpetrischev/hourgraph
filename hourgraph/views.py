@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.tokens import default_token_generator
 from django.utils import timezone
@@ -13,9 +15,10 @@ from django.conf import settings
 from django.urls import reverse
 from django.core.mail import send_mail
 from django.utils.encoding import force_bytes, force_str
-from .models import Users, StudentCard, StudentCardGroup
+from .models import Users, StudentCard, StudentCardGroup, LessonTemplate, Lesson
 from .serializers import UserRegistrationSerializer, CustomTokenObtainPairSerializer, PasswordResetRequestSerializer, \
-    PasswordResetConfirmSerializer, PasswordChangeSerializer, StudentCardSerializer, StudentCardGroupSerializer
+    PasswordResetConfirmSerializer, PasswordChangeSerializer, StudentCardSerializer, StudentCardGroupSerializer, \
+    LessonTemplateSerializer, LessonSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -145,7 +148,15 @@ class StudentCardGroupViewSet(viewsets.ModelViewSet):
         return StudentCardGroup.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        return serializer.save(user=self.request.user)
+        # Получаем данные M2M-поля из запроса
+        students_data = self.request.data.get('students', [])
+
+        # Сохраняем объект, но пока без M2M-поля
+        instance = serializer.save(user=self.request.user)
+
+        # Добавляем M2M-связи после создания объекта
+        if students_data:
+            instance.students.set(students_data)
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -165,3 +176,102 @@ class StudentCardGroupViewSet(viewsets.ModelViewSet):
             raise PermissionDenied('Вы не можете удалить эту запись.')
 
         return super().destroy(request, *args, **kwargs)
+
+
+class LessonTemplateViewSet(viewsets.ModelViewSet):
+    serializer_class = LessonTemplateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return LessonTemplate.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        return serializer.save(user=self.request.user)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        if instance.user != self.request.user:
+            raise PermissionDenied('Вы не можете удалить эту запись.')
+
+        return super().destroy(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        if instance.user != self.request.user:
+            raise PermissionDenied('Вы не можете изменять эту запись.')
+
+        if 'student' in request.data:
+            instance.student_group = None
+            instance.save()
+        if 'student_group' in request.data:
+            instance.student = None
+            instance.save()
+
+        return super().update(request, *args, **kwargs)
+
+
+class LessonViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = LessonSerializer
+
+    def get_queryset(self):
+        return Lesson.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        return serializer.save(user=self.request.user)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        if instance.user != self.request.user:
+            raise PermissionDenied('Вы не можете изменять эту запись.')
+
+        if 'student' in request.data:
+            instance.student_group = None
+            instance.save()
+        if 'student_group' in request.data:
+            instance.student = None
+            instance.save()
+
+        return super().update(request, *args, **kwargs)
+
+
+class WeekViewSet(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, *args, **kwargs):
+        date_str = request.query_params.get('date', None)
+        if date_str:
+            try:
+                date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            except ValueError:
+                return Response(
+                    {'error': 'Некорректный формат даты. Используйте YYYY-MM-DD.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        else:
+            date = datetime.now().date()
+
+        start_week = date - timedelta(days=date.weekday())
+        end_week = start_week + timedelta(days=6)
+        lessons = Lesson.objects.filter(date__gte=start_week, date__lte=end_week, user=self.request.user)
+
+        current_weekday = date.strftime('%A').upper()[:2]
+        weekday_order = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']
+        templates = LessonTemplate.objects.filter(
+            user=self.request.user,
+            weekday__in=weekday_order[weekday_order.index(current_weekday):]
+        )
+
+        lessons_serializer = LessonSerializer(lessons, many=True)
+        templates_serializer = LessonTemplateSerializer(templates, many=True)
+
+        response_data = {
+            'start_week': start_week,
+            'end_week': end_week,
+            'current_weekday': current_weekday,
+            'templates': templates_serializer.data,
+            'lessons': lessons_serializer.data
+        }
+        return Response(response_data)

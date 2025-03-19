@@ -5,7 +5,7 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.urls import reverse
 from allauth.account.models import EmailAddress, EmailConfirmation
-from hourgraph.models import Users, StudentCard, StudentCardGroup
+from hourgraph.models import Users, StudentCard, StudentCardGroup, LessonTemplate, Lesson
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -103,3 +103,29 @@ class StudentCardGroupSerializer(serializers.ModelSerializer):
         model = StudentCardGroup
         fields = ['id', 'students', 'name', 'comment']
 
+
+class LessonTemplateSerializer(serializers.ModelSerializer):
+    student = serializers.PrimaryKeyRelatedField(queryset=StudentCard.objects.all(), allow_null=True,
+                                                 required=False)
+    student_group = serializers.PrimaryKeyRelatedField(queryset=StudentCardGroup.objects.all(), allow_null=True,
+                                                       required=False)
+    student_details = StudentCardSerializer(source='student', read_only=True)
+    student_group_details = StudentCardGroupSerializer(source='student_group', read_only=True)
+    class Meta:
+        model = LessonTemplate
+        fields = ['id', 'student', 'student_details', 'student_group', 'student_group_details', 'start_time',
+                  'end_time', 'weekday', 'comment']
+
+
+class LessonSerializer(serializers.ModelSerializer):
+    student = serializers.PrimaryKeyRelatedField(queryset=StudentCard.objects.all(), allow_null=True,
+                                                 required=False)
+    student_group = serializers.PrimaryKeyRelatedField(queryset=StudentCardGroup.objects.all(), allow_null=True,
+                                                       required=False)
+    student_details = StudentCardSerializer(source='student', read_only=True)
+    student_group_details = StudentCardGroupSerializer(source='student_group', read_only=True)
+
+    class Meta:
+        model = Lesson
+        fields = ['id', 'student', 'student_details', 'student_group', 'student_group_details', 'start_time',
+                  'end_time', 'date', 'status', 'comment']
