@@ -3,12 +3,13 @@ version: '3.9'
 services:
   backend:
     build:
-      context: ./backend
+      context: ./hourgraph
     container_name: django_backend
+    command: ["sh", "-c", "/app/entrypoint.sh"]
     env_file:
       - .env
     volumes:
-      - ./backend:/app
+      - ./hourgraph:/app
     ports:
       - "8000:8000"
     depends_on:
@@ -19,11 +20,19 @@ services:
       context: ./frontend
     container_name: vue_frontend
     ports:
-      - "8080:80"
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - backend
 
   db:
     image: postgres:14
     container_name: postgres_db
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     env_file:
       - .env
     volumes:

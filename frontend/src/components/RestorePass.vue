@@ -101,7 +101,7 @@ export default {
       this.error = '';
       
       try {
-        await axios.post('http://127.0.0.1:8000/api/password/reset/', {email: this.email});
+        await axios.post(`http://${process.env.VUE_APP_IP}:8000/api/password/reset/`, {email: this.email});
         
         // Переключение на следующий шаг
         this.emailSent = true;

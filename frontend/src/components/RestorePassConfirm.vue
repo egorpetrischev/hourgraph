@@ -120,7 +120,7 @@ export default {
       this.serverError = '';
 
       try {
-        await axios.post('http://127.0.0.1:8000/api/password/reset/confirm/' + this.uid + '/' + this.token + '/', {
+        await axios.post(`http://${process.env.VUE_APP_IP}:8000/api/password/reset/confirm/` + this.uid + '/' + this.token + '/', {
           uidb64: this.uid,
           token: this.token,
           new_password: this.password

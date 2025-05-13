@@ -4,7 +4,6 @@ import router from './router';
 
 // Создаём приложение
 const app = createApp(App);
-
 // Подключаем роутер
 app.use(router);
 

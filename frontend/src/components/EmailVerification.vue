@@ -96,7 +96,7 @@ export default {
 
       try {
         // Отправляем запрос на подтверждение email с ключом активации
-        await axios.post('http://127.0.0.1:8000/api/verify-email/' + this.activationKey + '/');
+        await axios.post(`http://${process.env.VUE_APP_IP}:8000/api/verify-email/` + this.activationKey + '/');
 
         console.log('как бы должен');
         // Если запрос успешен, устанавливаем флаг подтверждения

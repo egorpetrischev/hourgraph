@@ -108,7 +108,7 @@ export default {
       this.loginError = '';
 
       try {
-         const response = await axios.post('http://127.0.0.1:8000/api/token/', {
+         const response = await axios.post(`http://${process.env.VUE_APP_IP}:8000/api/token/`, {
             email: this.email,
             password: this.password
           });
@@ -120,7 +120,7 @@ export default {
         //await new Promise(resolve => setTimeout(resolve, 1000));
 
         // После успешной авторизации можно редиректить на нужную страницу
-        this.$router.push('/restore-password');
+        this.$router.push('/');
 
         console.log('Логин успешен', this.email);
       } catch (error) {

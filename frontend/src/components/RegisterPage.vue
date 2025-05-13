@@ -187,7 +187,7 @@ export default {
       this.registerError = '';
 
       try {
-        await axios.post('http://127.0.0.1:8000/api/register/', {
+        await axios.post(`http://${process.env.VUE_APP_IP}:8000/api/register/`, {
           name: this.name,
           email: this.email,
           password: this.password
