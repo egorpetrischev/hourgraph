@@ -21,9 +21,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         confirmation = EmailConfirmation.create(email_address)
         key = confirmation.key
 
-        confirm_url = request.build_absolute_uri(
-            reverse('verify_email', args=[key])
-        )
+        confirm_url = f'http://192.168.1.6:3000/verify-email/{key}'
 
         subject = 'Подтвердите ваш email'
         message = f'Для подтверждения email перейдите по ссылке: {confirm_url}'

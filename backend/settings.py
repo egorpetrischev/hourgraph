@@ -87,7 +87,9 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://192.168.1.6:8082",  # Разрешить запросы от Vue.js
+    "http://192.168.1.6:3000",  # Разрешить запросы от Vue.js
+    'http://localhost:3000',
+    'http://127.0.0.1:3000'
 ]
 
 ROOT_URLCONF = 'backend.urls'

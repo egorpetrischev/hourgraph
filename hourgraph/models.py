@@ -71,7 +71,9 @@ class Lesson(models.Model): # Таблица "Lesson"
     status = models.CharField(max_length=2, default='TB', choices=(
         ('TB', 'To be'),
         ('PR', 'Processing'),
-        ('CO', 'Completed')
+        ('CO', 'Completed'),
+        ('CA', 'Canceled'),
+        ('DE', 'Deleted')
     ))
     comment = models.TextField(null=True, blank=True)
 

@@ -68,8 +68,7 @@ class PasswordResetRequestView(APIView):
             user = Users.objects.get(email=email)
             token = default_token_generator.make_token(user)
             uid = urlsafe_base64_encode(force_bytes(user.pk))
-            reset_url = reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
-            reset_url = f"127.0.0.1/8080/{reset_url}"  # Укажите URL вашего фронтенда settings.FRONTEND_URL
+            reset_url = f"http://192.168.1.6:3000/pass-reset/{uid}/{token}/"
             send_mail(
                 'Сброс пароля',
                 f'Перейдите по ссылке для сброса пароля: {reset_url}',
@@ -221,6 +220,9 @@ class LessonViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         return serializer.save(user=self.request.user)
+
+    def destroy(self, request, *args, **kwargs):
+        raise PermissionDenied('Удаление записей запрещено.')
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
