@@ -28,13 +28,20 @@
       "node": true
     },
     "extends": [
-      "plugin:vue/vue3-essential",
+      "plugin:vue/vue3-recommended",
       "eslint:recommended"
     ],
     "parserOptions": {
       "parser": "@babel/eslint-parser"
     },
-    "rules": {}
+    "rules": {
+      "no-undef": "off",
+      "vue/max-attributes-per-line": "off",
+      "vue/html-self-closing": "off",
+      "vue/singleline-html-element-content-newline": "off",
+      "vue/attributes-order": "off",
+      "vue/html-closing-bracket-spacing": "off"
+    }
   },
   "browserslist": [
     "> 1%",

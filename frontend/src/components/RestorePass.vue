@@ -67,12 +67,10 @@
         </div>
         
         <div class="form-actions">
-          
           <button @click="goToLogin" class="btn-primary">
             Вернуться к входу
           </button>
         </div>
-          
       </div>
     </div>
   </div>
