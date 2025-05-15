@@ -99,7 +99,7 @@ export default {
       this.error = '';
       
       try {
-        await axios.post(`http://${process.env.VUE_APP_IP}:8000/api/password/reset/`, {email: this.email});
+        await axios.post(`${process.env.VUE_APP_IP_ADDRESS_BACKEND}/api/password/reset/`, {email: this.email});
         
         // Переключение на следующий шаг
         this.emailSent = true;

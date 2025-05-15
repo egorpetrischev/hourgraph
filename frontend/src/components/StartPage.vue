@@ -67,7 +67,7 @@ export default {
     methods: {
         async handleLogout() {
             try {
-                await axios.post(`http://${process.env.VUE_APP_IP}:8000/api/logout/`, {
+                await axios.post(`${process.env.VUE_APP_IP_ADDRESS_BACKEND}/api/logout/`, {
                     refresh: localStorage.getItem('ref_token')
                 }, {
                     headers: {

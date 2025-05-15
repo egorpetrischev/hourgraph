@@ -174,7 +174,7 @@ const groupToDelete = ref(null);
 const fetchGroups = async () => {
   try {
     loading.value = true;
-    const response = await axios.get(`http://${process.env.VUE_APP_IP}:8000/api/studentcardgroups/`, {
+    const response = await axios.get(`${process.env.VUE_APP_IP_ADDRESS_BACKEND}/api/studentcardgroups/`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
@@ -191,7 +191,7 @@ const fetchGroups = async () => {
 const fetchAllStudents = async () => {
   try {
     loadingStudents.value = true;
-    const response = await axios.get(`http://${process.env.VUE_APP_IP}:8000/api/studentcards/`, {
+    const response = await axios.get(`${process.env.VUE_APP_IP_ADDRESS_BACKEND}/api/studentcards/`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
@@ -307,7 +307,7 @@ const saveGroup = async () => {
     if (isEditing.value) {
       // Обновление существующей группы
       await axios.put(
-        `http://${process.env.VUE_APP_IP}:8000/api/studentcardgroups/${currentGroup.value.id}/`,
+        `${process.env.VUE_APP_IP_ADDRESS_BACKEND}/api/studentcardgroups/${currentGroup.value.id}/`,
         groupData,
         {
           headers: {
@@ -318,7 +318,7 @@ const saveGroup = async () => {
     } else {
       // Добавление новой группы
       await axios.post(
-        `http://${process.env.VUE_APP_IP}:8000/api/studentcardgroups/`,
+        `${process.env.VUE_APP_IP_ADDRESS_BACKEND}/api/studentcardgroups/`,
         groupData,
         {
           headers: {
@@ -349,7 +349,7 @@ const cancelDelete = () => {
 const deleteGroup = async () => {
   try {
     await axios.delete(
-      `http://${process.env.VUE_APP_IP}:8000/api/studentcardgroups/${groupToDelete.value.id}/`,
+      `${process.env.VUE_APP_IP_ADDRESS_BACKEND}/api/studentcardgroups/${groupToDelete.value.id}/`,
       {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

@@ -108,7 +108,7 @@ export default {
       this.loginError = '';
 
       try {
-         const response = await axios.post(`http://${process.env.VUE_APP_IP}:8000/api/token/`, {
+         const response = await axios.post(`${process.env.VUE_APP_IP_ADDRESS_BACKEND}/api/token/`, {
             email: this.email,
             password: this.password
           });

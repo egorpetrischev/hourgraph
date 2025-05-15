@@ -26,51 +26,71 @@
         &#8594;
       </button>
     </div>
-
-    <!-- Основное представление шаблона -->
-    <div class="template-grid">
-      <div
-        v-for="(day, index) in weekdayColumns"
-        :key="day.code"
-        class="weekday-column"
-        :class="{ 'active-day': index === currentDayIndex }"
+    
+      
+    <div class="week-scroll-wrapper">
+      <button 
+        class="scroll-nav left" 
+        @click="scrollWeek(-300)"
+        :disabled="scrollProgress === 0"
+      ></button>
+      
+      <div 
+        class="week-scroll-container" 
+        ref="weekScrollContainer"
       >
-        <div class="weekday-header">{{ day.name }}</div>
-        <div class="lessons-container">
-          <div v-if="loading" class="loading-state">
-            <p>Загрузка занятий...</p>
-          </div>
-          <div v-else-if="getFilteredLessons(day.code).length === 0" class="empty-state">
-            <p>Нет занятий</p>
-          </div>
-          <div v-else class="lessons-list">
-            <div
-              v-for="lesson in getFilteredLessons(day.code)"
-              :key="lesson.id"
-              class="lesson-card"
-            >
-              <div class="lesson-time">
-                {{ formatTime(lesson.start_time) }} - {{ formatTime(lesson.end_time) }}
+        <!-- Основное представление шаблона -->
+        <div class="template-grid">
+          <div
+            v-for="(day, index) in weekdayColumns"
+            :key="day.code"
+            class="weekday-column"
+            :class="{ 'active-day': index === currentDayIndex }"
+          >
+            <div class="weekday-header">{{ day.name }}</div>
+            <div class="lessons-container">
+              <div v-if="loading" class="loading-state">
+                <p>Загрузка занятий...</p>
               </div>
-              <div class="lesson-info">
-                <span v-if="lesson.student_details">
-                  {{ lesson.student_details.name }} {{ lesson.student_details.surname }}
-                </span>
-                <span v-else-if="lesson.student_group_details">
-                  Группа: {{ lesson.student_group_details.name }}
-                </span>
+              <div v-else-if="getFilteredLessons(day.code).length === 0" class="empty-state">
+                <p>Нет занятий</p>
               </div>
-              <div class="lesson-comment" v-if="lesson.comment">
-                {{ lesson.comment }}
-              </div>
-              <div class="lesson-actions">
-                <button type="button" class="details-btn" @click="openDetailsModal(lesson)">Подробнее</button>
-                <button type="button" class="delete-btn" @click="confirmDelete(lesson)">Удалить</button>
+              <div v-else class="lessons-list">
+                <div
+                  v-for="lesson in getFilteredLessons(day.code)"
+                  :key="lesson.id"
+                  class="lesson-card"
+                >
+                  <div class="lesson-time">
+                    {{ formatTime(lesson.start_time) }} - {{ formatTime(lesson.end_time) }}
+                  </div>
+                  <div class="lesson-info">
+                    <span v-if="lesson.student_details">
+                      {{ lesson.student_details.name }} {{ lesson.student_details.surname }}
+                    </span>
+                    <span v-else-if="lesson.student_group_details">
+                      Группа: {{ lesson.student_group_details.name }}
+                    </span>
+                  </div>
+                  <div class="lesson-comment" v-if="lesson.comment">
+                    {{ lesson.comment }}
+                  </div>
+                  <div class="lesson-actions">
+                    <button type="button" class="details-btn" @click="openDetailsModal(lesson)">Подробнее</button>
+                    <button type="button" class="delete-btn" @click="confirmDelete(lesson)">Удалить</button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <button 
+        class="scroll-nav right" 
+        @click="scrollWeek(300)"
+        :disabled="scrollProgress === 100"
+      ></button>
     </div>
 
     <!-- Модальное окно для добавления/редактирования занятия -->
@@ -212,7 +232,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import {ref, computed, onMounted, watch, onUnmounted} from 'vue';
 import axios from 'axios';
 
 // Состояние загрузки
@@ -240,6 +260,39 @@ const timeConflictError = ref(false);
 
 // Текущая мобильная навигация
 const currentDayIndex = ref(0);
+
+// Отслеживание прогресса скролла
+const weekScrollContainer = ref(null);
+const scrollProgress = ref(0);
+
+const scrollWeek = (offset) => {
+  if (weekScrollContainer.value) {
+    weekScrollContainer.value.scrollBy({
+      left: offset,
+      behavior: 'smooth'
+    });
+  }
+};
+
+const updateScrollProgress = () => {
+  if (weekScrollContainer.value) {
+    const { scrollLeft, scrollWidth, clientWidth } = weekScrollContainer.value;
+    const progress = (scrollLeft / (scrollWidth - clientWidth)) * 100;
+    scrollProgress.value = Math.round(progress);
+  }
+};
+
+onMounted(() => {
+  if (weekScrollContainer.value) {
+    weekScrollContainer.value.addEventListener('scroll', updateScrollProgress);
+  }
+});
+
+onUnmounted(() => {
+  if (weekScrollContainer.value) {
+    weekScrollContainer.value.removeEventListener('scroll', updateScrollProgress);
+  }
+});
 
 // Текущее занятие для редактирования/удаления
 const currentLesson = ref({
@@ -307,7 +360,7 @@ const filteredGroups = computed(() => {
 const fetchTemplates = async () => {
   try {
     loading.value = true;
-    const response = await axios.get(`http://${process.env.VUE_APP_IP}:8000/api/lesson-templates/`, {
+    const response = await axios.get(`${process.env.VUE_APP_IP_ADDRESS_BACKEND}/api/lesson-templates/`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
@@ -323,7 +376,7 @@ const fetchTemplates = async () => {
 const fetchStudents = async () => {
   try {
     loadingStudents.value = true;
-    const response = await axios.get(`http://${process.env.VUE_APP_IP}:8000/api/studentcards/`, {
+    const response = await axios.get(`${process.env.VUE_APP_IP_ADDRESS_BACKEND}/api/studentcards/`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
@@ -339,7 +392,7 @@ const fetchStudents = async () => {
 const fetchGroups = async () => {
   try {
     loadingGroups.value = true;
-    const response = await axios.get(`http://${process.env.VUE_APP_IP}:8000/api/studentcardgroups/`, {
+    const response = await axios.get(`${process.env.VUE_APP_IP_ADDRESS_BACKEND}/api/studentcardgroups/`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
@@ -478,7 +531,7 @@ const saveLesson = async () => {
     if (isEditing.value) {
       // Обновление существующего занятия
       await axios.put(
-        `http://${process.env.VUE_APP_IP}:8000/api/lesson-templates/${lessonData.id}/`,
+        `${process.env.VUE_APP_IP_ADDRESS_BACKEND}/api/lesson-templates/${lessonData.id}/`,
         lessonData,
         {
           headers: {
@@ -489,7 +542,7 @@ const saveLesson = async () => {
     } else {
       // Добавление нового занятия
       await axios.post(
-        `http://${process.env.VUE_APP_IP}:8000/api/lesson-templates/`,
+        `${process.env.VUE_APP_IP_ADDRESS_BACKEND}/api/lesson-templates/`,
         lessonData,
         {
           headers: {
@@ -521,7 +574,7 @@ const cancelDelete = () => {
 const deleteLesson = async () => {
   try {
     await axios.delete(
-      `http://${process.env.VUE_APP_IP}:8000/api/lesson-templates/${lessonToDelete.value.id}/`,
+      `${process.env.VUE_APP_IP_ADDRESS_BACKEND}/api/lesson-templates/${lessonToDelete.value.id}/`,
       {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -633,11 +686,112 @@ onMounted(() => {
   font-size: 1rem;
 }
 
+.week-scroll-wrapper {
+  position: relative;
+  margin: 0 40px; /* Оставляем место для кнопок */
+}
+
+.week-scroll-container {
+  width: 100%;
+  overflow-x: auto;
+  scroll-behavior: smooth; /* Плавный скролл */
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  padding-bottom: 16px;
+
+  /* Скрываем стандартный скроллбар */
+  &::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+  }
+}
+
+
+.scroll-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  background: white;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 2px 12px rgba(110, 58, 255, 0.2);
+  z-index: 2;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.3s;
+  pointer-events: none;
+
+  /* Иконка стрелки */
+  &::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border: 2px solid #6E3AFF;
+    border-left: none;
+    border-bottom: none;
+  }
+}
+
+.week-scroll-wrapper:hover .scroll-nav {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.scroll-nav.left {
+  left: -20px;
+  &::before {
+    transform: rotate(-135deg) translateX(-1px);
+    margin-right: 2px;
+  }
+}
+
+.scroll-nav.right {
+  right: -20px;
+  &::before {
+    transform: rotate(45deg) translateX(-1px);
+    margin-left: 2px;
+  }
+}
+
+.scroll-nav:hover {
+  background: #6E3AFF;
+  &::before {
+    border-color: white;
+  }
+}
+
+.scroll-nav:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.scroll-nav:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 .template-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(200px, 1fr));
   gap: 1rem;
   min-height: 500px;
+  width: max-content;
+  min-width: 100%;
+}
+
+/* Градиенты по краям для индикации скролла */
+.week-scroll-container {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 20px,
+    #000 calc(100% - 20px),
+    transparent
+  );
 }
 
 .weekday-column {
@@ -998,6 +1152,85 @@ input:checked + .slider:before {
 
 /* Медиа-запросы для мобильных устройств */
 @media (max-width: 768px) {
+    /* Убираем кнопки прокрутки */
+  .scroll-nav.left,
+  .scroll-nav.right {
+    display: none !important;
+  }
+
+  /* Убираем горизонтальный скролл */
+  .week-scroll-container {
+    overflow-x: hidden !important;
+    mask-image: none !important;
+  }
+
+  /* Корректируем отступы */
+  .week-scroll-wrapper {
+    margin: 0 !important;
+  }
+
+  /* Для мобильной навигации по дням */
+  .template-grid {
+    display: block;
+    width: 100%;
+  }
+
+  .weekday-column {
+    display: none;
+  }
+
+  .weekday-column.active-day {
+    display: flex;
+  }
+
+
+  .weekday-navigation.mobile-only {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    background-color: #F0EBFF;
+    padding: 0.75rem;
+    border-radius: 6px;
+  }
+
+  .weekday-navigation .weekday-header {
+    display: none; /* Скрываем дублирующий заголовок */
+  }
+
+  .current-day {
+    font-weight: 600;
+    font-size: 1rem;
+    min-width: 120px;
+    text-align: center;
+  }
+
+  .nav-arrow {
+    background-color: #6E3AFF;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .nav-arrow:disabled {
+    background-color: #CCCCCC;
+    cursor: not-allowed;
+  }
+
+  /* Скрываем дублирующий заголовок в колонке */
+  .weekday-column .weekday-header {
+    display: none;
+  }
+
     .template-container {
         padding: 1rem;
     }

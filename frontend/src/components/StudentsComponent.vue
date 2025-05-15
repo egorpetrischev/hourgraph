@@ -111,7 +111,7 @@ const studentToDelete = ref(null);
 const fetchStudents = async () => {
   try {
     loading.value = true;
-    const response = await axios.get(`http://${process.env.VUE_APP_IP}:8000/api/studentcards/`, {
+    const response = await axios.get(`${process.env.VUE_APP_IP_ADDRESS_BACKEND}/api/studentcards/`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
@@ -165,7 +165,7 @@ const saveStudent = async () => {
     if (isEditing.value) {
       // Обновление существующего студента
       await axios.put(
-        `http://${process.env.VUE_APP_IP}:8000/api/studentcards/${currentStudent.value.id}/`,
+        `${process.env.VUE_APP_IP_ADDRESS_BACKEND}/api/studentcards/${currentStudent.value.id}/`,
         currentStudent.value,
         {
           headers: {
@@ -177,7 +177,7 @@ const saveStudent = async () => {
       // Добавление нового студента
         console.log(currentStudent.value);
       await axios.post(
-        `http://${process.env.VUE_APP_IP}:8000/api/studentcards/`,
+        `${process.env.VUE_APP_IP_ADDRESS_BACKEND}/api/studentcards/`,
         currentStudent.value,
         {
           headers: {
@@ -208,7 +208,7 @@ const cancelDelete = () => {
 const deleteStudent = async () => {
   try {
     await axios.delete(
-      `http://${process.env.VUE_APP_IP}:8000/api/studentcards/${studentToDelete.value.id}/`,
+      `${process.env.VUE_APP_IP_ADDRESS_BACKEND}/api/studentcards/${studentToDelete.value.id}/`,
       {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

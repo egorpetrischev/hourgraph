@@ -68,7 +68,7 @@ router.beforeEach(async (to, from, next) => {
     // Если пользователь авторизован, не пускаем на гостевые маршруты
     if (isGuestRoute) {
       try {
-        const response = await fetch(`http://${process.env.VUE_APP_IP}:8000/api/check-auth/`, {
+        const response = await fetch(`${process.env.VUE_APP_IP_ADDRESS_BACKEND}/api/check-auth/`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
 
@@ -93,7 +93,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   try {
-    const response = await fetch(`http://${process.env.VUE_APP_IP}:8000/api/check-auth/`, {
+    const response = await fetch(`${process.env.VUE_APP_IP_ADDRESS_BACKEND}/api/check-auth/`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
 
