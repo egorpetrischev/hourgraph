@@ -11,6 +11,7 @@
       <Students v-if="currentPage === 'students'"/>
       <GroupsComponent v-if="currentPage === 'groups'" />
       <TemplateComponent v-if="currentPage === 'template'" />
+      <ScheduleComponent v-if="currentPage === 'schedule'" />
       <!-- Здесь будут другие компоненты для остальных страниц -->
     </div>
   </div>
@@ -23,6 +24,7 @@ import Students from "@/components/StudentsComponent.vue"; // Импортиру
 import {watch} from "vue";
 import GroupsComponent from "@/components/GroupsComponent.vue";
 import TemplateComponent from "@/components/TemplateComponent.vue";
+import ScheduleComponent from "@/components/ScheduleComponent.vue";
 
 // Текущая страница
 const currentPage = ref(localStorage.getItem('page') ? localStorage.getItem('page') :'schedule');

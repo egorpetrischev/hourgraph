@@ -303,6 +303,7 @@ onMounted(() => {
   gap: 1rem;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   touch-action: manipulation;
+    min-height: 150px;
 }
 
 .student-card:hover {
@@ -310,11 +311,22 @@ onMounted(() => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+.student-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 3.5rem;
+}
+
 .student-info h3 {
   margin: 0;
   font-weight: 600;
   color: #2D2D2D;
   text-align: center;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.3;
 }
 
 .student-actions {

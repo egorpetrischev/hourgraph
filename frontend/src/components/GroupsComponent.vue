@@ -444,6 +444,8 @@ onMounted(() => {
   gap: 1rem;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   touch-action: manipulation;
+  min-height: 150px;
+  height: 100%;
 }
 
 .group-card:hover {
@@ -452,6 +454,10 @@ onMounted(() => {
 }
 
 .group-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   text-align: center;
 }
 
@@ -459,18 +465,28 @@ onMounted(() => {
   margin: 0 0 0.5rem;
   font-weight: 600;
   color: #2D2D2D;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: 3em;
 }
 
 .student-count {
   color: #757575;
   font-size: 0.875rem;
   margin: 0;
+  word-break: break-word;
 }
 
 .group-actions {
   display: flex;
   gap: 0.75rem;
-  margin-top: 0.5rem;
+  margin-top: auto; /* Прижимаем кнопки к низу */
 }
 
 .details-btn, .delete-btn {
@@ -559,7 +575,7 @@ onMounted(() => {
 }
 
 .form-group input {
-  width: 100%;
+  width: 95%;
   padding: 0.75rem;
   border: 1px solid #E0E0E0;
   border-radius: 6px;
