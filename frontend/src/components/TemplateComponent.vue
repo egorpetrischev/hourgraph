@@ -769,9 +769,7 @@ onMounted(() => {
 }
 
 .scroll-nav:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-  box-shadow: none;
+  display: none;
 }
 
 .template-grid {

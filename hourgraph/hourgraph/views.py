@@ -68,7 +68,7 @@ class PasswordResetRequestView(APIView):
             user = Users.objects.get(email=email)
             token = default_token_generator.make_token(user)
             uid = urlsafe_base64_encode(force_bytes(user.pk))
-            reset_url = f"http://192.168.1.6:3000/pass-reset/{uid}/{token}/"
+            reset_url = f"{settings.FRONTEND_IP}/pass-reset/{uid}/{token}/"
             send_mail(
                 'Сброс пароля',
                 f'Перейдите по ссылке для сброса пароля: {reset_url}',
@@ -222,7 +222,12 @@ class LessonViewSet(viewsets.ModelViewSet):
         return serializer.save(user=self.request.user)
 
     def destroy(self, request, *args, **kwargs):
-        raise PermissionDenied('Удаление записей запрещено.')
+        instance = self.get_object()
+
+        if instance.user != self.request.user:
+            raise PermissionDenied('Вы не можете удалить эту запись.')
+
+        return super().destroy(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -241,6 +246,11 @@ class LessonViewSet(viewsets.ModelViewSet):
 
 
 class WeekViewSet(APIView):
+    def is_in_past(self, date):
+        today = datetime.now().date()
+        start_of_week = today - timedelta(days=today.weekday())
+        return date < start_of_week
+
     permission_classes = [IsAuthenticated]
     def get(self, request, *args, **kwargs):
         date_str = request.query_params.get('date', None)
@@ -260,11 +270,15 @@ class WeekViewSet(APIView):
         lessons = Lesson.objects.filter(date__gte=start_week, date__lte=end_week, user=self.request.user)
 
         current_weekday = date.strftime('%A').upper()[:2]
-        weekday_order = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']
-        templates = LessonTemplate.objects.filter(
-            user=self.request.user,
-            weekday__in=weekday_order[weekday_order.index(current_weekday):]
-        )
+
+        if self.is_in_past(date):
+            templates = None
+        else:
+            weekday_order = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']
+            templates = LessonTemplate.objects.filter(
+                user=self.request.user,
+                weekday__in=weekday_order[weekday_order.index(current_weekday):]
+            )
 
         lessons_serializer = LessonSerializer(lessons, many=True)
         templates_serializer = LessonTemplateSerializer(templates, many=True)

@@ -1,11 +1,9 @@
-version: '3.9'
-
 services:
   backend:
     build:
       context: ./hourgraph
     container_name: django_backend
-    command: ["sh", "-c", "/app/entrypoint.sh"]
+    command: ["sh", "/app/entrypoint.sh", "django"]
     env_file:
       - .env
     volumes:
@@ -40,5 +38,32 @@ services:
     ports:
       - "5432:5432"
 
+  redis:
+    image: redis:alpine
+    ports: [ "6379:6379" ]
+    volumes:
+      - redis_data:/data
+
+  celery_worker:
+    build: ./hourgraph
+    command: ["sh", "/app/entrypoint.sh", "celery_worker"]
+    env_file: .env
+    volumes:
+      - ./hourgraph:/app
+    depends_on:
+      - backend
+      - redis
+
+  celery_beat:
+    build: ./hourgraph
+    command: ["sh", "/app/entrypoint.sh", "celery_beat"]
+    env_file: .env
+    volumes:
+      - ./hourgraph:/app
+    depends_on:
+      - backend
+      - redis
+
 volumes:
   postgres_data:
+  redis_data:

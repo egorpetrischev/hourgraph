@@ -70,7 +70,6 @@ class Lesson(models.Model): # Таблица "Lesson"
     date = models.DateField()
     status = models.CharField(max_length=2, default='TB', choices=(
         ('TB', 'To be'),
-        ('PR', 'Processing'),
         ('CO', 'Completed'),
         ('CA', 'Canceled'),
         ('DE', 'Deleted')
