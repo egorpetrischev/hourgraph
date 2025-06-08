@@ -64,6 +64,21 @@ services:
       - backend
       - redis
 
+  telegram_bot:
+      build:
+        context: ./telegram_bot
+      container_name: telegram_bot
+      env_file:
+        - .env  # Общий файл переменных
+      volumes:
+        - ./hourgraph:/app/hourgraph  # Для доступа к Django-моделям
+        - ./telegram_bot:/app  # Код бота
+      depends_on:
+        - db
+        - redis
+      networks:
+        - default
+
 volumes:
   postgres_data:
   redis_data:

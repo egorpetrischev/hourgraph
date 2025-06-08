@@ -145,6 +145,9 @@ body {
 
 .nav-link.active {
   color: #6E3AFF;
+    font-family: 'Manrope', sans-serif;
+  font-weight: 600;
+  font-size: 0.875rem;
 }
 
 .nav-link.active::after {
